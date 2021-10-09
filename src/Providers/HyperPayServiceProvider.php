@@ -5,15 +5,14 @@ namespace Devloops\HyperPay\Providers;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Class HyperPayServiceProvider
+ * Class HyperPayServiceProvider.
  *
- * @package Devloops\HyperPay\Providers
  * @date 7/16/21
+ *
  * @author Abdullah Al-Faqeir <abdullah@devloops.net>
  */
 class HyperPayServiceProvider extends ServiceProvider
 {
-
     /**
      * Bootstrap services.
      *
@@ -61,5 +60,4 @@ class HyperPayServiceProvider extends ServiceProvider
 
         $this->mergeConfigFrom(dirname(__DIR__).'/Config/system.php', 'core');
     }
-
 }

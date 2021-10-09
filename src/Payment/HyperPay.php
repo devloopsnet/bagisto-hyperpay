@@ -2,22 +2,21 @@
 
 namespace Devloops\HyperPay\Payment;
 
+use Illuminate\Support\Facades\Http;
 use JetBrains\PhpStorm\ArrayShape;
 use Webkul\Payment\Payment\Payment;
-use Illuminate\Support\Facades\Http;
 
 /**
- * Class HyperPay
+ * Class HyperPay.
  *
- * @package Devloops\HyperPay\Payment
  * @date 7/16/21
+ *
  * @author Abdullah Al-Faqeir <abdullah@devloops.net>
  */
 class HyperPay extends Payment
 {
-
     /**
-     * Payment method code
+     * Payment method code.
      *
      * @var string
      */
@@ -28,13 +27,14 @@ class HyperPay extends Payment
         /**
          * @var $cart \Webkul\Checkout\Models\Cart
          */
-        $cart           = $this->getCart();
+        $cart = $this->getCart();
         $billingAddress = $cart->billing_address;
-        $name           = $billingAddress->first_name.' '.$billingAddress->last_name;
-        $TransactionId  = "TRXORDER{$cart->id}";
-        $CheckoutData   = $this->prepareCheckout($cart->id, $cart->grand_total, $billingAddress->email, $name, $TransactionId);
+        $name = $billingAddress->first_name.' '.$billingAddress->last_name;
+        $TransactionId = "TRXORDER{$cart->id}";
+        $CheckoutData = $this->prepareCheckout($cart->id, $cart->grand_total, $billingAddress->email, $name, $TransactionId);
         if ($CheckoutData['result']['code'] === '000.200.100') {
             $CheckoutId = $CheckoutData['id'];
+
             return route('hyperpay.redirect', [
                 'cart'          => $cart->id,
                 'checkoutId'    => $CheckoutId,
@@ -66,24 +66,27 @@ class HyperPay extends Payment
         if ($this->isSandbox()) {
             $params['testMode'] = 'EXTERNAL';
         }
+
         return Http::withHeaders($this->getHeaders())
                    ->withBody(http_build_query($params), 'application/x-www-form-urlencoded')
                    ->post($this->getUrl().'/v1/checkouts')
                    ->json();
     }
 
-    #[ArrayShape(['Authorization' => "string"])] private function getHeaders(): array
-    {
-        return [
-            'Authorization' => 'Bearer '.$this->getConfigData('access_token'),
-        ];
-    }
+    #[ArrayShape(['Authorization' => 'string'])]
+ private function getHeaders(): array
+ {
+     return [
+         'Authorization' => 'Bearer '.$this->getConfigData('access_token'),
+     ];
+ }
 
     private function getUrl(): string
     {
         if ($this->isSandbox()) {
             return 'https://test.oppwa.com';
         }
+
         return 'https://oppwa.com';
     }
 
@@ -102,9 +105,9 @@ class HyperPay extends Payment
         $data = [
             'entityId' => $this->getConfigData('entity_id'),
         ];
+
         return Http::withHeaders($this->getHeaders())
                    ->get($this->getUrl().$resourcePath.'?'.http_build_query($data))
                    ->json();
     }
-
 }
