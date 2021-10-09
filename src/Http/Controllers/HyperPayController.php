@@ -2,29 +2,25 @@
 
 namespace Devloops\HyperPay\Http\Controllers;
 
-use Illuminate\View\View;
-use Webkul\Paypal\Helpers\Ipn;
-use Webkul\Checkout\Facades\Cart;
-use Webkul\Payment\Facades\Payment;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Support\Facades\Config;
-use Devloops\MasterCard\Payment\MasterCard;
-use Webkul\Sales\Repositories\OrderRepository;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Config;
+use Illuminate\View\View;
+use Webkul\Checkout\Facades\Cart;
+use Webkul\Sales\Repositories\OrderRepository;
 
 /**
- * Class HyperPayController
+ * Class HyperPayController.
  *
- * @package Devloops\HyperPay\Http\Controllers
  * @date 29/09/2021
+ *
  * @author Abdullah Al-Faqeir <abdullah@devloops.net>
  */
 class HyperPayController extends Controller
 {
-
     /**
-     * OrderRepository object
+     * OrderRepository object.
      *
      * @var \Webkul\Sales\Repositories\OrderRepository
      */
@@ -33,8 +29,7 @@ class HyperPayController extends Controller
     /**
      * Create a new controller instance.
      *
-     * @param  \Webkul\Sales\Repositories\OrderRepository  $orderRepository
-     *
+     * @param \Webkul\Sales\Repositories\OrderRepository $orderRepository
      */
     public function __construct(
         OrderRepository $orderRepository,
@@ -62,15 +57,16 @@ class HyperPayController extends Controller
 
     public function process($cartId, string $checkoutId, string $transactionId): RedirectResponse
     {
-        $CheckoutId   = request()->get('id');
+        $CheckoutId = request()->get('id');
         $resourcePath = request()->get('resourcePath');
-        $payment      = app(Config::get('paymentmethods.'.Cart::getCart()->payment->method.'.class'));
-        $paymentData  = $payment->paymentData($resourcePath);
+        $payment = app(Config::get('paymentmethods.'.Cart::getCart()->payment->method.'.class'));
+        $paymentData = $payment->paymentData($resourcePath);
 
         $resultCode = $paymentData['result']['code'] ?? '';
         if (isset($paymentData['amount']) && preg_match('/^(000\.000\.|000\.100\.1|000\.[36])/', $resultCode)) {
             return $this->success($cartId);
         }
+
         return $this->cancel();
     }
 
@@ -81,7 +77,7 @@ class HyperPayController extends Controller
             'checkoutId'    => $checkoutId,
             'transactionId' => $transactionId,
         ]);
+
         return view('hyperpay::redirect', compact('transactionId', 'checkoutId', 'action'));
     }
-
 }
